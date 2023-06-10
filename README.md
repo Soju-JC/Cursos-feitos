@@ -1,2 +1,2 @@
 # Cursos-feitos
-Repositório de registros das atividades e conhecimentos obtidos ao longo dos cursos realizados.
+Repositório de notas de aulas dos cursos finalizados ou em andamento.
