@@ -3,4 +3,4 @@
 
 - SQL 75%
 - Python 55%
-- ML 7%
+- ML 9%
