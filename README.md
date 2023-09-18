@@ -4,5 +4,5 @@
 - SQL and databases 100%
 - Data Warehouse 0%
 - Python 79%
-- ML 27%
+- ML 29%
 - DL 0%
