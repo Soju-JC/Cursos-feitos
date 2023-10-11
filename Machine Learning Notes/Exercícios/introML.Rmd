@@ -1,0 +1,553 @@
+---
+title: "Exercícios de Machine Learning"
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: '4'
+  html_document:
+    toc: true
+    toc_depth: '4'
+date: "2023"
+geometry: "left=1cm,right=1cm,top=2cm,bottom=2cm"
+header-includes:
+  - \renewcommand{\contentsname}{Sumário}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newpage
+
+# Introdução à Ciência de Dados Fundamentos e Aplicações - Morettin & Singer (exercícios do livro e alguns extras dados no curso Introdução ao Aprendizado de Máquina)
+
+## Questão 1 (Portfólio)
+
+O formato preliminar dos estudos pode ser encontrado no GitHub: [repositório](https://github.com/Soju-JC/Cursos-feitos/tree/main/Machine%20Learning%20Notes/Exerc%C3%ADcios). Materiais derivados destes estudos serão incorporados no site oficial em formato de artigos para um blog em [josecarlosinfo](https://www.josecarlosinfo.com/), em específico as questões 3, 4 e 13.
+
+## Questão 2 (Revisão)
+
+Capítulos 6 a 6.2, 6.3 e 6.5 - do livro de Morettin e Singer revisados.
+
+## Questão 3 (Morettin & Singer)
+
+```{r, message=FALSE, warning=FALSE}
+library("dplyr") # Pacote de manipulação de dados
+
+# Dados da tabela 6.13 do livro Introdução à Ciência de Dados (Morettin & Singer)
+volume <- c(656, 692, 588, 799, 766, 800, 693, 602,
+            737, 921, 923, 945, 816, 584, 642, 970)
+peso <- c(630, 745, 690, 890, 825, 960, 835, 570, 
+          705, 955, 990, 725, 840, 640, 740, 945)
+dados_lobo <- as_tibble(data.frame(volume, peso))
+```
+
+### 3.i
+
+Considerando dados de volume (c$\text{m}^3$) e peso (g) do lobo direito do fígado de 16 pacientes submetidos a transplante inter-vivos, com o objetivo de estimar o peso por meio do volume, podemos usar um modelo de regressão linear simples. A suposta relação linear entre volume (variável independente) e o peso (variável resposta) pode ter a seguinte representação:
+
+$$
+y=\beta_0+\beta_1 x+\epsilon
+$$
+
+Onde, y é o peso do lobo direito do fígado, x é o volume, $\epsilon$ é o erro aleatório e os termos $\beta$ são os parâmetros. A interpretação dos parâmetros nessa representação se dá por $\beta_0$ como sendo o valor do peso quando o volume é zero (caso mais extremo), e $\beta_1$ como sendo o "efeito" ou mudança esperada no peso para uma unidade de incremento do volume.
+
+### 3.ii
+
+Podemos notar que a **Figura 1** sugere uma relação linear positiva entre o volume e o peso, onde, quanto maior o volume, maior é o peso. É importante também observar no canto inferior direito um ponto que aparenta sair um pouco do comportamento linear geral dos dados.
+
+```{r, message=FALSE, warning=FALSE}
+library("ggplot2") # Pacote para construção de gráficos
+
+# Gráfico de dispersão entre peso e volume do lobo direito do fígado
+ggplot(dados_lobo, aes(x = volume, y = peso)) +
+  geom_point() +
+  labs(x = expression("Volume (cm"^3*")"), 
+       y = expression("Peso (g)")) +
+  ggtitle("Volume vs. Peso")
+```
+
+**Figura 1**: Gráfico de dispersão entre volume (c$\text{m}^3$) e peso (g) do lobo direito do fígado dos 16 pcientes.
+
+### 3.iii
+
+Ao ajustar o modelo linear simples, podemos ver no **Output 1** que a cada unidade de mudança no volume há um aumento de 0.76 (g) no peso do lobo direito do fígado dos pacientes. Além disso, olhando apenas para a métrica do coeficiente de determinação, o modelo explica 58\% da variação do peso.
+
+```{r, message=FALSE, warning=FALSE}
+# Ajuste do modelo de regressão linear
+modelo <- lm(peso ~ volume, data = dados_lobo)
+
+# Resumo do modelo
+summary(modelo)
+```
+
+**Output 1**: Resumo do modelo incluindo informações como coeficientes estimados, significância, etc.
+
+Ao visualizar o ajuste pela **Figura 2**, o comportamento da reta em relação aos pontos me leva a suspeitar que possivelmente ela esteja sendo influenciada por algum ponto. Considerando que identificamos um em específico razoavelmente fora do padrão de comportamento dos dados, ele pode ser o culpado. Caso de fato seja, o correto é estudar esse ou os demais pontos que sejam influentes para determinar se faz sentido considerar a análise com ou sem eles incluídos.
+
+```{r, message=FALSE, warning=FALSE}
+# Gráfico de dispersão dos dados originais com a linha de regressão
+ggplot(dados_lobo, aes(x = volume, y = peso)) +
+  geom_point() +  # Gráfico de dispersão dos dados
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Linha de regressão
+  labs(x = "Volume Previsto (cm³)", y = "Peso Real (g)") +
+  ggtitle("Ajuste do Modelo de Regressão Linear") +
+  theme_minimal()
+```
+
+**Figura 2**: Gráfico do ajuste realizado.
+
+Para verificar a suposição de normalidade dos resíduos, no **Output 2**, foram aplicados 6 diferentes testes de normalidade, onde, ao nível de 5\% de significância, não há evidências para a rejeição da normalidade dos resíduos. Note que além dos testes de Shapiro, nenhum outro teve valor-p abaixo de 0.05, isso por que os testes de Shapiro são, em sua natureza, mais exigentes (leve em consideração que temos uma amostra pequena).
+
+```{r, message=FALSE, warning=FALSE}
+library("nortest") # Pacote para testes
+
+# Função para testar normalidade
+test_press <- function(k){
+  rst <- rstudent(k)
+
+require(nortest)
+
+t1 <- ks.test(rst,"pnorm") #KS
+t2 <- lillie.test(rst) # Lilliefors
+t3 <- cvm.test(rst) # Cramér-von Mises
+t4 <- shapiro.test(rst) # Shapiro-Wilk
+t5 <- sf.test(rst) # Shapiro-Francia
+t6 <- ad.test(rst) # Anderson-Darling
+
+# Tabela de resultados
+testes <- c(t1$method, 
+            t2$method,
+            t3$method, 
+            t4$method,
+            t5$method, 
+            t6$method
+            )
+estt <- as.numeric(c(t1$statistic, 
+                     t2$statistic,
+                     t3$statistic,
+                     t4$statistic,
+                     t5$statistic, 
+                     t6$statistic)
+                   )
+valorp <- c(t1$p.value, t2$p.value, t3$p.value, t4$p.value, t5$p.value,t6$p.value)
+resultados <- cbind(estt, valorp)
+rownames(resultados) <- testes
+colnames(resultados) <- c("Estatística", "p")
+print(resultados, digits = 4)
+  
+}
+
+# Testando a normalidade dos resíduos
+test_press(modelo)
+```
+
+**Output 2**: Testes de normalidade verificados e seus respectivos valores p.
+
+Ao verificar a homocedasticidade, vemos no **Output 3** ao aplicar o teste de Breusch-Pagan, ao nível de 5\% de significância, que não há evidências para a rejeição da hipótese de que os resíduos são distribuídos com igual variância (são homocedásticos). Além disso, ao aplicar o teste de Durbin-Watson, onde a hipótese nula é de que os resíduos não são correlacionados, ao nível de 5\% de significância, não há evidências de correlação dos resíduos. Por fim, podemos ver que os resíduos padronizados estão todos contidos no intervalo -3 a 3, o que a princípio indica que não há presença de dados extremos (outliers).
+
+```{r, message=FALSE, warning=FALSE}
+library("lmtest") # Pacote para testes de regressão
+library("car") # Pacote para funções e testes de regressão
+
+# Teste de Breusch-Pagan (Homocedasticidade)
+bptest(modelo)
+
+# Teste de Durbin-Watson (correlação dos resíduos)
+durbinWatsonTest(modelo)
+
+# Verificando outliers
+summary(rstandard(modelo))
+```
+
+**Output 3**: Teste de Breusch-Pagan para homocedasticidade e de Durbin-Watson para verificar correlação dos resíduos. Além disso, a verificação de dados extremos utilizando resíduos padronizados.
+
+### 3.iv
+
+No **Output 4** foi computado os intervalos de confiança para os coeficientes estimados. Assim, temos uma estimativa de $\beta_0 = 213.27$ com intervalo de confiança de 95\% sendo $[-72.70, 499.25]$, e de $\beta_1 = 0.76$ com intervalo de confiança de 95\% sendo $[0.39, 1.14]$.
+
+```{r, message=FALSE, warning=FALSE}
+# Construção dos intervalos de confiança para os parâmetros
+intervalos_confianca <- confint(modelo)
+print(intervalos_confianca)
+```
+
+**Output 4**: Intervalos de confiança dos parâmetros do modelo.
+
+### 3.v
+
+A equação de regressão obtida é a seguinte:
+
+$$\text{peso} = 213.27 + (0.76)\cdot\text{volume}$$
+
+Considere a seguinte expressão para o intervalo de confiança do valor esperado:
+
+$$\hat{y} \pm t_{\alpha / 2, n-2} \sqrt{M S E} \sqrt{\frac{1}{n}+\frac{(x-\bar{x})^2}{\sum\left(x_i-\bar{x}\right)^2}}$$
+
+Levando em consideração os volumes 600, 700, 800, 900 e 1000 c$\text{m}^3$ sugeridos no enunciado. Teremos o seguinte:
+
+**Peso esperado ($\hat{y}$) para cada volume**
+
+$$\hat{y} = 213.27 + (0.76)\cdot\text{600} = 669.27$$
+$$\hat{y} = 213.27 + (0.76)\cdot\text{700} = 745.27$$
+$$\hat{y} = 213.27 + (0.76)\cdot\text{800} = 821.27$$
+$$\hat{y} = 213.27 + (0.76)\cdot\text{900} = 897.27$$
+$$\hat{y} = 213.27 + (0.76)\cdot\text{1000} = 973.27$$
+
+**Valor crítico da distribuição t ($t_{\alpha / 2, n-2}$), o erro padrão ($\sqrt{MSE}$), a média amostral $\bar{x}$ e a soma $\sum\left(x_i-\bar{x}\right)^2$**
+
+```{r, message=FALSE, warning=FALSE}
+# Nível de confiança
+nivel_confianca <- 0.95
+
+# Valor crítico da distribuição t para o nível de confiança
+(valor_critico <- qt((1 + nivel_confianca) / 2, df = nobs(modelo) - 2))
+
+# Erro padrão
+(erro_p <- summary(modelo)$sigma)
+
+# Média amostral
+(media_amostral <- mean(volume))
+
+# Soma (valor - média)^2
+(soma_vm <- sum((volume - media_amostral)^2))
+```
+
+**Output 5**: Medidas necessárias para calcular os intervalos de confiança.
+
+**Calculando o intervalo considerando cada volume sugerido**
+
+```{r, message=FALSE, warning=FALSE}
+# Calculando intervalos de confiança considerando cada volume sugerido
+
+# Volume 600
+seiscentos_superior <- 
+  669.27+valor_critico*erro_p*sqrt((1/16) + ((600 - media_amostral)^2)/soma_vm)
+seiscentos_inferior <- 
+  669.27-valor_critico*erro_p*sqrt((1/16) + ((600 - media_amostral)^2)/soma_vm)
+
+# Volume 700
+setecentos_superior <- 
+  745.27+valor_critico*erro_p*sqrt((1/16) + ((700 - media_amostral)^2)/soma_vm)
+setecentos_inferior <- 
+  745.27-valor_critico*erro_p*sqrt((1/16) + ((700 - media_amostral)^2)/soma_vm)
+
+# Volume 800
+oitocentos_superior <- 
+  821.27+valor_critico*erro_p*sqrt((1/16) + ((800 - media_amostral)^2)/soma_vm)
+oitocentos_inferior <- 
+  821.27-valor_critico*erro_p*sqrt((1/16) + ((800 - media_amostral)^2)/soma_vm)
+
+# Volume 900
+novecentos_superior <- 
+  897.27+valor_critico*erro_p*sqrt((1/16) + ((900 - media_amostral)^2)/soma_vm)
+novecentos_inferior <- 
+  897.27-valor_critico*erro_p*sqrt((1/16) + ((900 - media_amostral)^2)/soma_vm)
+
+# Volume 1000
+mil_superior <- 
+  973.27+valor_critico*erro_p*sqrt((1/16) + ((1000 - media_amostral)^2)/soma_vm)
+mil_inferior <- 
+  973.27-valor_critico*erro_p*sqrt((1/16) + ((1000 - media_amostral)^2)/soma_vm)
+
+# Tabela
+intervalo_superior <- c(round(seiscentos_superior, 2), 
+                        round(setecentos_superior, 2), 
+                        round(oitocentos_superior, 2),
+                        round(novecentos_superior, 2),
+                        round(mil_superior, 2))
+intervalo_inferior <- c(round(seiscentos_inferior, 2), 
+                        round(setecentos_inferior, 2), 
+                        round(oitocentos_inferior, 2),
+                        round(novecentos_inferior, 2),
+                        round(mil_inferior, 2))
+peso_estimado <- c(669.27, 745.27, 821.27, 897.27, 973.27)
+
+tab_intervalos <- data.frame(peso = peso_estimado, 
+                             ICI = intervalo_inferior, 
+                             ICS = intervalo_superior)
+print(tab_intervalos, row.names = FALSE)
+```
+
+**Output 5**: Tabela com os valores dos pesos esperados para cada volume e seus respectivos intervalos de confiança.
+
+### 3.vi
+
+O modelo sem intercepto terá a mesma representação apresentada no item 3.i, porém sem o termo $\beta_0$. Assim, a interpretação dos demais termos é a mesma.
+
+Como não há nenhuma alteração nos dados, o item 3.ii também será o mesmo.
+
+Ao ajustar o modelo linear simples sem intercepto, podemos ver no Output 1 que a cada unidade de mudança no volume há um aumento de 1.04 (g) no peso do lobo direito do fígado dos pacientes. Além disso, olhando apenas para a métrica do coeficiente de determinação, o modelo explica 98.7% da variação do peso (consideravelmente maior do que o $\text{R}^2$ do modelo com intercepto).
+
+```{r, message=FALSE, warning=FALSE}
+# Ajuste do modelo de regressão linear sem intercepto
+modelo_0 <- lm(peso ~ 0 + volume, data = dados_lobo)
+
+# Resumo do modelo
+summary(modelo_0)
+```
+
+**Output 6**: Resumo do modelo sem intercepto incluindo informações como coeficientes estimados, significância, etc.
+
+Ao visualizar o ajuste pela **Figura 3**, o comportamento da reta em relação aos pontos parece razoável, e a suspeita do ponto no canto inferior direto de influenciar a reta não existe mais.
+
+```{r, message=FALSE, warning=FALSE}
+# Gráfico de dispersão dos dados originais com a linha de regressão
+ggplot(dados_lobo, aes(x = volume, y = peso)) +
+  geom_point() +  # Gráfico de dispersão dos dados
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "blue", 
+              formula = y ~ x - 1) +  # Linha de regressão (sem intercepto)
+  labs(x = "Volume Previsto (cm³)", y = "Peso Real (g)") +
+  ggtitle("Ajuste do Modelo de Regressão Linear (sem intercepto)") +
+  theme_minimal()
+```
+
+**Figura 3**: Gráfico do ajuste realizado sem intercepto.
+
+Podemos obervar pelo **Output 7** que apenas o teste de Kolmogorov apontou para a normalidade dos resíduos. Além disso, O teste de Durbin-Watson apontou para resíduos não correlacionados, e ao verificar a presença de valores extremos através dos resíduos padronizados pude constatar que não há outliers. Por fim, não foi possível aplicar o teste de Breusch-Pagan para verificar homocedasticidade por ele requerir um modelo com intercepto, o que me levou a aplicar o teste de Goldfeld-Quandt, o qual apontou para resíduos homocedásticos. No geral, o modelo atende aos pressupostos, com a ressalva de que no quesito normalidade, apenas o teste de Kolmogorov o suporta.
+
+```{r, message=FALSE, warning=FALSE}
+# Testando a normalidade dos resíduos
+test_press(modelo_0)
+
+# Teste de Goldfeld-Quandt (Homocedasticidade)
+resultado_teste <- lmtest::gqtest(modelo_0, alternative = "two.sided")
+print(resultado_teste)
+
+# Teste de Durbin-Watson (correlação dos resíduos)
+durbinWatsonTest(modelo_0)
+
+# Verificando outliers
+summary(rstandard(modelo_0))
+```
+
+**Output 7**: Testes de diagnósticos do modelo sem intercepto.
+
+No **Output 8** foi computado os intervalos de confiança para os coeficientes estimados. Assim, temos uma estimativa de $\beta_1 = 1.04$ com intervalo de confiança de 95\% sendo $[0.97, 1.10]$.
+
+```{r, message=FALSE, warning=FALSE}
+# Construção dos intervalos de confiança para os parâmetros
+intervalos_confianca <- confint(modelo_0)
+print(intervalos_confianca)
+```
+
+**Output 8**: Intervalo de confiança do parâmetro do modelo sem intercepto.
+
+A equação de regressão obtida é a seguinte:
+
+$$\text{peso} = 0 + (1.04)\cdot\text{volume}$$
+
+Irei considerar a mesma expressão para o intervalo de confiança do valor esperado utilizada no item 3.v. Levando em consideração os volumes 600, 700, 800, 900 e 1000 c$\text{m}^3$ sugeridos no enunciado. Teremos o seguinte:
+
+**Peso esperado ($\hat{y}$) para cada volume**
+
+$$\hat{y} = 0 + (1.04)\cdot\text{600} = 624$$
+$$\hat{y} = 0 + (1.04)\cdot\text{700} = 728$$
+$$\hat{y} = 0 + (1.04)\cdot\text{800} = 832$$
+$$\hat{y} = 0 + (1.04)\cdot\text{900} = 936$$
+$$\hat{y} = 0 + (1.04)\cdot\text{1000} = 1040$$
+
+**Valor crítico da distribuição t ($t_{\alpha / 2, n-1}$), o erro padrão ($\sqrt{MSE}$), a média amostral $\bar{x}$ e a soma $\sum\left(x_i-\bar{x}\right)^2$**
+
+```{r, message=FALSE, warning=FALSE}
+# Nível de confiança
+nivel_confianca <- 0.95
+
+# Valor crítico da distribuição t para o nível de confiança
+(valor_critico0 <- qt((1 + nivel_confianca) / 2, df = nobs(modelo_0) - 1))
+
+# Erro padrão
+(erro_p0 <- summary(modelo_0)$sigma)
+
+# Média amostral
+(media_amostral <- mean(volume))
+
+# Soma (valor - média)^2
+(soma_vm <- sum((volume - media_amostral)^2))
+```
+
+**Output 9**: Medidas necessárias para calcular os intervalos de confiança considerando o modelo sem intercepto.
+
+**Calculando o intervalo considerando cada volume sugerido**
+
+```{r, message=FALSE, warning=FALSE}
+# Calculando intervalos de confiança considerando cada volume sugerido
+
+# Volume 600
+seiscentos_superior0 <- 
+  624+valor_critico0*erro_p0*sqrt((1/16) + ((600 - media_amostral)^2)/soma_vm)
+seiscentos_inferior0 <- 
+  624-valor_critico0*erro_p0*sqrt((1/16) + ((600 - media_amostral)^2)/soma_vm)
+
+# Volume 700
+setecentos_superior0 <- 
+  728+valor_critico0*erro_p0*sqrt((1/16) + ((700 - media_amostral)^2)/soma_vm)
+setecentos_inferior0 <- 
+  728-valor_critico0*erro_p0*sqrt((1/16) + ((700 - media_amostral)^2)/soma_vm)
+
+# Volume 800
+oitocentos_superior0 <- 
+  832+valor_critico0*erro_p0*sqrt((1/16) + ((800 - media_amostral)^2)/soma_vm)
+oitocentos_inferior0 <- 
+  832-valor_critico0*erro_p0*sqrt((1/16) + ((800 - media_amostral)^2)/soma_vm)
+
+# Volume 900
+novecentos_superior0 <- 
+  936+valor_critico0*erro_p0*sqrt((1/16) + ((900 - media_amostral)^2)/soma_vm)
+novecentos_inferior0 <- 
+  936-valor_critico0*erro_p0*sqrt((1/16) + ((900 - media_amostral)^2)/soma_vm)
+
+# Volume 1000
+mil_superior0 <- 
+  1040+valor_critico0*erro_p0*sqrt((1/16) + ((1000 - media_amostral)^2)/soma_vm)
+mil_inferior0 <- 
+  1040-valor_critico0*erro_p0*sqrt((1/16) + ((1000 - media_amostral)^2)/soma_vm)
+
+# Tabela
+intervalo_superior0 <- c(round(seiscentos_superior0, 2), 
+                        round(setecentos_superior0, 2), 
+                        round(oitocentos_superior0, 2),
+                        round(novecentos_superior0, 2),
+                        round(mil_superior0, 2))
+intervalo_inferior0 <- c(round(seiscentos_inferior0, 2), 
+                        round(setecentos_inferior0, 2), 
+                        round(oitocentos_inferior0, 2),
+                        round(novecentos_inferior0, 2),
+                        round(mil_inferior0, 2))
+peso_estimado0 <- c(624, 728, 832, 936, 1040)
+
+tab_intervalos0 <- data.frame(peso = peso_estimado0, 
+                             ICI = intervalo_inferior0, 
+                             ICS = intervalo_superior0)
+print(tab_intervalos0, row.names = FALSE)
+```
+
+**Output 10**: Tabela com os valores dos pesos esperados para cada volume e seus respectivos intervalos de confiança considerando o modelo sem intercepto.
+
+No geral o modelo sem intecepto está bem ajustado, com algumas ressalvas a serem feitas a respeito da normalidade dos resíduos. O problema é que esse modelo automaticamente assume que se o volume do lobo direito do fígado for zero, então o peso também será zero, o que é uma suposição muito forte a ser feita, e deve se ter muito cuidado. No geral o intercepto é sempre incluído na análise, embora provavelmente possa existir casos específicos nos quais não necessitem, e como não tenho certeza se de fato faz sentido assumir o intercepto zero nesse cenário (consultar com profissionais da área ou pesquisador responsável), o modelo com intercepto acaba sendo mais conveniente.
+
+## Questão 6 (Morettin & Singer)
+
+Expressão (6.29 do livro):
+
+$$\log \left[\frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}\right]=\alpha+\beta x_i, i=1, \ldots, n$$
+
+Expressão (6.30 do livro):
+
+$$P\left(Y_i=1 \mid X=x\right)=\frac{\exp \left(\alpha+\beta x_i\right)}{1+\exp \left(\alpha+\beta x_i\right)}, i=1, \ldots, n$$
+
+Ambas são equivalentes, irei mostrar a seguir.
+
+$$\log \left[\frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}\right]=\alpha+\beta x_i, i=1, \ldots, n$$
+
+$$\Leftrightarrow \exp \left[\log \left(\frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}\right)\right]=\exp \left(\alpha+\beta x_i\right), i=1, \ldots, n$$
+
+$$\Leftrightarrow \frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}=\exp \left(\alpha+\beta x_i\right), i=1, \ldots, n$$
+
+$$\Leftrightarrow \frac{P\left(Y_i=1 \mid X=x\right)}{1-P\left(Y_i=1 \mid X=x\right)}=\exp \left(\alpha+\beta x_i\right), i=1, \ldots, n$$
+
+$$\Leftrightarrow P\left(Y_i=1 \mid X=x\right)=\exp \left(\alpha+\beta x_i\right)-P\left(Y_i=1 \mid X=x\right) \exp \left(\alpha+\beta x_i\right), i=1, \ldots, n$$
+
+$$\Leftrightarrow \exp \left(\alpha+\beta x_i\right) = P\left(Y_i=1 \mid X=x\right)+P\left(Y_i=1 \mid X=x\right) \exp \left(\alpha+\beta x_i\right), i=1, \ldots, n$$
+
+$$\Leftrightarrow \exp \left(\alpha+\beta x_i\right) = P\left(Y_i=1 \mid X=x\right)\left(1+\exp \left(\alpha+\beta x_i\right)\right), i=1, \ldots, n$$
+
+$$\Leftrightarrow P\left(Y_i=1 \mid X=x\right)=\frac{\exp \left(\alpha+\beta x_i\right)}{1+\exp \left(\alpha+\beta x_i\right)}, i=1, \ldots, n$$
+
+Note que a expressão de $P\left(Y_i=1 \mid X=x\right)$ possui o denominador igual ao numerador porém somando 1. Como a função exponencial é sempre positiva para qualquer valor de $x$, o denominador será sempre uma unidade maior que o numerador para qualquer valor de $\alpha$, $\beta$ e $x$, ou seja, a expressão sempre resultará em um valor entre 0 e 1.
+
+## Questão 7 (Morettin & Singer)
+
+A razão de chances (odds ratio) é definida da seguinte forma:
+
+$$OR = \frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}, i=1, \ldots, n$$
+
+Logo, ao aplicar a função logarítmica em ambos os lado obtemos:
+
+$$\log{(OR)} = \log{\left(\frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}\right)} = \alpha+\beta x_i, i=1, \ldots, n$$
+
+Asim, para cada aumento de uma unidade em $x_i$, o log da razão de chances muda com um impacto de $\beta$ vezes.
+
+## Questão 8 (Extra)
+
+Quando temos como objetivo modelar algum fenômeno com o intuito de obter previsões, separamos os dados em amostra de treino e amostra de teste, onde na amostra de treino nós treinamos nosso modelo e, em seguida, utilizamos a amostra de teste para verificar sua capacidade de previsão.
+
+Em alguns casos, pode acontecer do modelo ser muito bom e trazer métricas espetaculares, mas na hora de prever novos valores que estão fora da amostra, ele possui um desempenho muito ruim. Quando isso acontece, dizemos que temos um sobreajuste (Overfitting), o que indica que o modelo não tem capacidade de generalização. Por outro lado, podemos obter modelos que simplesmente possuem um ajuste muito pobre, não sendo capazes de captar a variabilidade dos dados corretamente, indicando um subajuste (Underfitting).
+
+Uma forma de lidar com esse problema é dividir a amostra em várias partições de treino e teste, como por exemplo, utilizando métodos de validação cruzada, em que as partições de treino e teste da amostra são feitas diversas vezes para avaliar se aquele modelo de fato é razoável. Assim, sempre precisamos buscar modelos que estejam no meio-termo entre sobreajuste e subajuste e, sempre que possível, aplicar técnicas de validação cruzada ou qualquer outra nesse sentido para garantir que o modelo sendo feito é de fato útil na prática.
+
+## Questão 9 (Extra)
+
+Demonstração da expressão do trade-off entre viés e veriância.
+
+Irei partir da seguinte expressão:
+
+$$EQM = E\left[Y_0-\widehat{f}\left(\mathbf{x}_0\right)\right]^2$$
+
+Considere que $Y_0 = f(\mathbf{x_0}) + \epsilon_0$:
+
+$$ = E\left[\left(f\left(\mathbf{x_0}\right)+\epsilon_0-\hat{f}\left(\mathbf{x_0}\right)\right)^2\right]$$
+
+$$ = E\left[\left(f\left(\mathbf{x_0}\right)-\hat{f}\left(\mathbf{x_0}\right)\right)^2\right]+E\left[2 \epsilon_0\left(f\left(\mathbf{x_0}\right)-\hat{f}\left(\mathbf{x_0}\right)\right)\right]+E\left[\epsilon_0^2\right]$$
+
+O termo $E\left[2 \epsilon_0\left(f\left(\mathbf{x_0}\right)-\hat{f}\left(\mathbf{x_0}\right)\right)\right]$ é zero pois $E\left[\epsilon_0\right] = 0$, logo:
+
+$$ = E\left[\left(f\left(\mathbf{x_0}\right)-\hat{f}\left(\mathbf{x_0}\right)\right)^2\right]+E\left[\epsilon_0^2\right]$$
+
+Visto que $Var(\epsilon_0) = E\left[\epsilon_0^2\right] + \left[E\left(\epsilon_0\right)\right]^2$ e $E\left[\epsilon_0\right] = 0$, temos que:
+
+$$= \operatorname{Var}\left[\widehat{f}\left(\mathbf{x}_0\right)\right]+\operatorname{Vies}\left[\widehat{f}\left(\mathbf{x}_0\right)\right]^2+\operatorname{Var}\left(\epsilon_0\right)$$
+
+## Questão 10 (Extra)
+
+Em Estatística e Ciência de Dados, a ideia de flexibilidade também pode ser vista como complexidade, isso porque muitas vezes queremos ser capazes de explicar muito bem um fenômeno através de uma modelagem orientada a dados, por exemplo. A escolha da técnica é crucial para determinar se seremos capazes de obter bons resultados e, ao mesmo tempo, explicá-los. Técnicas mais flexíveis tendem a retornar resultados muito bons se devidamente utilizadas, mas, em contrapartida, tendem a ser mais complexas de serem empregadas, limitando principalmente no quesito de interpretabilidade do fenômeno em questão. Por outro lado, técnicas menos flexíveis, ou seja, com mais limitações seja estruturais ou no quesito de pressupostos e suposições necessárias para que ela possa ser utilizada, tendem a ser mais interpretáveis.
+
+Uma forma de pensar sobre isso é lembrando de modelos de regressão, por exemplo. São modelos com boa interpretabilidade, mas que requerem diversas condições para serem utilizados e validados. Enquanto que modelos mais complexos, como redes neurais, por exemplo, de fato costumam apresentar resultados muito bons, mas são muito mais difíceis de serem interpretados.
+
+No fim, em cenários em que apenas previsões são o suficiente, e que o custo computacional não seja um problema, técnicas com alta flexibilidade possuem muito espaço. No entanto, caso seja um cenário em que a interpretabilidade seja muito importante, modelos menos flexíveis tendem a ser uma melhor opção.
+
+## Questão 11 (Extra)
+
+Todo Estatístico ou Cientista de Dados, antes de realizar uma modelagem, precisa se perguntar com qual objetivo em mente o fenômeno deverá ser modelado. Se queremos explicar o fenômeno com base nas relações entre as variáveis independentes e ele, ou se queremos encontrar uma estrutura ou modelo que permita prever valores desse fenômeno que estão fora da amostra em mãos. Em outras palavras, se temos objetivo inferencial, preditivo ou ambos.
+
+A escolha do objetivo é de suma importância, pois a forma com que a modelagem é feita difere. Quando queremos um modelo explicativo (objetivo inferencial), as variáveis independentes no modelo precisam fazer sentido prático para explicar o fenômeno de interesse (desfecho), mesmo que o poder preditivo desse modelo não seja o melhor. Por outro lado, quando queremos um modelo com alta capacidade preditiva, as variáveis independentes incluídas no modelo não necessariamente precisam ter sentido prático, desde que aumentem o poder de previsão do modelo, mesmo que não seja tão fácil interpretar os parâmetros do modelo posteriormente.
+
+Note que esses objetivos possuem pontos positivos e negativos, onde no objetivo inferencial temos maior capacidade explicativa e menor capacidade preditiva, e no objetivo preditivo temos maior capacidade preditiva e menor capacidade explicativa. Assim, muitas vezes queremos um modelo que tenha alta capacidade preditiva, mas ao mesmo tempo queremos a possibilidade de interpretar seus parâmetros e resultados das relações entre desfecho e variáveis independentes com maior facilidade, juntando assim ambos os objetivos e criando um modelo intermediário que seja razoável em ambos os cenários. Um exemplo disso é a regressão logística, que suporta a capacidade preditiva e ao mesmo tempo possui alta interpretação dos parâmetros, inclusive fazendo uma ligação direta com quantidades como a razão de chances, por exemplo.
+
+Esse tema também tem uma certa ligação com a ideia de flexibilidade de modelos, visto que quanto mais flexíveis eles tendem a ser, mais complexos são, e consequentemente a dificuldade de interpretação tende a aumentar, o que pode ser um problema caso o objetivo seja inferencial ou um objetivo híbrido. Por outro lado, em um cenário cujo objetivo seja estritamente preditivo, modelos altamente flexíveis podem não ser um problema, com algumas ressalvas a serem consideradas a respeito da capacidade computacional necessária para serem executados.
+
+No fim, é interessante sempre que possível buscar um equilíbrio entre a capacidade de interpretação e a capacidade preditiva ao modelar fenômenos, pois, embora queiramos prever, na maioria das vezes é de suma importância também entender e interpretar o fenômeno corretamente para trazer maior confiança nas previsões sendo realizadas.
+
+## Questão 12 (Extra)
+
+Quando escolhemos o objetivo de predição ao modelar um determinado fenômeno, estamos principalmente interessados na capacidade de previsão do modelo, quanto maior, melhor. Assim, por não haver uma preocupação primária na interpretação do modelo, é comum que o modelo escolhido para previsão, que contenha a melhor capacidade de previsão, seja um modelo caixa preta, ou seja, um modelo não interpretável. Dessa forma, quando queremos certo poder de interpretação nesses cenários, podemos recorrer a métodos de interpretabilidade que podem ser aplicados a qualquer modelo preditivo previamente ajustado.
+
+A Ornella em seu trabalho de iniciação científica discute esses métodos de interpretabilidade, entre eles temos o seguinte:
+
+  1 - **Gráfico de dependência parcial**: Considerando um grupo de covariáveis de interesse e um grupo das demais covariáveis, o gráfico de dependência parcial se baseia em uma função chamada de função de dependência parcial, a qual calcula o efeito médio das covariáveis de interesse ao marginalizar a distribuição das previsões sobre as demais covariáveis (nas quais não há interesse em explicar), tornando a função dependente apenas das covariáveis de interesse. A interpretação possibilitada a partir deste método só é válida no cenário em que as covariáveis de interesse são independentes das demais covariáveis.
+ 
+  2 - **Gráfico da esperança condicional individual**: Neste método, o grau de dependência entre variável e previsão é considerado para cada dado da amostra. Possui uma relação com o método da dependência parcial, onde o gráfico da dependência parcial é a média das curvas do gráfico da esperança condicional individual, e também está sujeito à mesma limitação, em que apenas é válido quando as covariáveis de interesse são independentes das demais covariáveis.
+  
+  3 - **Gráfico de efeitos locais acumulados**: Tem por objetivo calcular o efeito médio das covariáveis sobre as previsões do modelo. Ou seja, possui o mesmo objetivo do gráfico de dependência parcial, porém, faz uso da distribuição condicional das covariáveis. É uma alternativa ao gráfico de dependência parcial e ao gráfico da esperança condicional individual, pois o efeito estimado das covariáveis de interesse não é interferido por variáveis correlacionadas, o que burla de certa forma a limitação desses dois últimos métodos.
+  
+  4 - **Interação das covariáveis**: Avalia o peso da interação de uma determinada covariável com as demais, chamada de interação bidirecional, e também a interação total, ao avaliar todos os pares possíveis de covariáveis. A força dessa interação pode ser medida através do quanto a variação da previsão depende da interação sendo avaliada. Sua limitação é que funciona bem apenas para variáveis independentes.
+  
+  5 - **Modelo interpretável substituto global**: É um método em que um modelo substituto é treinado com o intuito de aproximar as previsões de um modelo não interpretável. O modelo substituto usa a previsão do modelo não interpretável como desfecho, assim, podemos utilizá-lo para tirar conclusões sobre o modelo de interesse interpretando o modelo substituto.
+  
+  6 - **Modelo interpretável substituto global e modelo interpretável substituto local**: O método global é um método em que um modelo substituto é treinado com o intuito de aproximar as previsões de um modelo não interpretável. O modelo substituto usa a previsão do modelo não interpretável como desfecho, assim, podemos utilizá-lo para tirar conclusões sobre o modelo de interesse interpretando o modelo substituto. Além disso, o método local tem a mesma ideia, porém, a ideia se concentra em explicar as previsões de forma individual em vez de global.
+  
+  7 - **Valores shapley**: É um método baseado na teoria dos jogos, que visa distribuir de forma justa as previsões às covariáveis de um subconjunto de variáveis de acordo com a contribuição (positiva ou negativa) individual de cada uma no modelo preditivo em relação à previsão média feita para todos os dados. É um dos métodos mais completos com intuito de explicabilidade, porém com um custo computacional maior.
+  
+Note que todos possuem cenários nos quais eles podem ser utilizados, então é importante verificar para o cenário em questão qual seria o método mais apropriado.
+  
+
+
+
+
+
+
+
+
+
