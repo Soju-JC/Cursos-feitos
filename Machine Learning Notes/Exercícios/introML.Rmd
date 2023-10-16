@@ -31,7 +31,7 @@ Capítulos 6 a 6.2, 6.3 e 6.5 - do livro de Morettin e Singer revisados.
 
 ## Questão 3 (Morettin & Singer)
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 library("dplyr") # Pacote de manipulação de dados
 
 # Dados da tabela 6.13 do livro Introdução à Ciência de Dados (Morettin & Singer)
@@ -56,7 +56,7 @@ Onde, y é o peso do lobo direito do fígado, x é o volume, $\epsilon$ é o err
 
 Podemos notar que a **Figura 1** sugere uma relação linear positiva entre o volume e o peso, onde, quanto maior o volume, maior é o peso. É importante também observar no canto inferior direito um ponto que aparenta sair um pouco do comportamento linear geral dos dados.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 library("ggplot2") # Pacote para construção de gráficos
 
 # Gráfico de dispersão entre peso e volume do lobo direito do fígado
@@ -73,7 +73,7 @@ ggplot(dados_lobo, aes(x = volume, y = peso)) +
 
 Ao ajustar o modelo linear simples, podemos ver no **Output 1** que a cada unidade de mudança no volume há um aumento de 0.76 (g) no peso do lobo direito do fígado dos pacientes. Além disso, olhando apenas para a métrica do coeficiente de determinação, o modelo explica 58\% da variação do peso.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Ajuste do modelo de regressão linear
 modelo <- lm(peso ~ volume, data = dados_lobo)
 
@@ -85,7 +85,7 @@ summary(modelo)
 
 Ao visualizar o ajuste pela **Figura 2**, o comportamento da reta em relação aos pontos me leva a suspeitar que possivelmente ela esteja sendo influenciada por algum ponto. Considerando que identificamos um em específico razoavelmente fora do padrão de comportamento dos dados, ele pode ser o culpado. Caso de fato seja, o correto é estudar esse ou os demais pontos que sejam influentes para determinar se faz sentido considerar a análise com ou sem eles incluídos.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Gráfico de dispersão dos dados originais com a linha de regressão
 ggplot(dados_lobo, aes(x = volume, y = peso)) +
   geom_point() +  # Gráfico de dispersão dos dados
@@ -99,7 +99,7 @@ ggplot(dados_lobo, aes(x = volume, y = peso)) +
 
 Para verificar a suposição de normalidade dos resíduos, no **Output 2**, foram aplicados 6 diferentes testes de normalidade, onde, ao nível de 5\% de significância, não há evidências para a rejeição da normalidade dos resíduos. Note que além dos testes de Shapiro, nenhum outro teve valor-p abaixo de 0.05, isso por que os testes de Shapiro são, em sua natureza, mais exigentes (leve em consideração que temos uma amostra pequena).
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 library("nortest") # Pacote para testes
 
 # Função para testar normalidade
@@ -146,7 +146,7 @@ test_press(modelo)
 
 Ao verificar a homocedasticidade, vemos no **Output 3** ao aplicar o teste de Breusch-Pagan, ao nível de 5\% de significância, que não há evidências para a rejeição da hipótese de que os resíduos são distribuídos com igual variância (são homocedásticos). Além disso, ao aplicar o teste de Durbin-Watson, onde a hipótese nula é de que os resíduos não são correlacionados, ao nível de 5\% de significância, não há evidências de correlação dos resíduos. Por fim, podemos ver que os resíduos padronizados estão todos contidos no intervalo -3 a 3, o que a princípio indica que não há presença de dados extremos (outliers).
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 library("lmtest") # Pacote para testes de regressão
 library("car") # Pacote para funções e testes de regressão
 
@@ -166,7 +166,7 @@ summary(rstandard(modelo))
 
 No **Output 4** foi computado os intervalos de confiança para os coeficientes estimados. Assim, temos uma estimativa de $\beta_0 = 213.27$ com intervalo de confiança de 95\% sendo $[-72.70, 499.25]$, e de $\beta_1 = 0.76$ com intervalo de confiança de 95\% sendo $[0.39, 1.14]$.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Construção dos intervalos de confiança para os parâmetros
 intervalos_confianca <- confint(modelo)
 print(intervalos_confianca)
@@ -196,7 +196,7 @@ $$\hat{y} = 213.27 + (0.76)\cdot\text{1000} = 973.27$$
 
 **Valor crítico da distribuição t ($t_{\alpha / 2, n-2}$), o erro padrão ($\sqrt{MSE}$), a média amostral $\bar{x}$ e a soma $\sum\left(x_i-\bar{x}\right)^2$**
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Nível de confiança
 nivel_confianca <- 0.95
 
@@ -217,7 +217,7 @@ nivel_confianca <- 0.95
 
 **Calculando o intervalo considerando cada volume sugerido**
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Calculando intervalos de confiança considerando cada volume sugerido
 
 # Volume 600
@@ -279,7 +279,7 @@ Como não há nenhuma alteração nos dados, o item 3.ii também será o mesmo.
 
 Ao ajustar o modelo linear simples sem intercepto, podemos ver no Output 1 que a cada unidade de mudança no volume há um aumento de 1.04 (g) no peso do lobo direito do fígado dos pacientes. Além disso, olhando apenas para a métrica do coeficiente de determinação, o modelo explica 98.7% da variação do peso (consideravelmente maior do que o $\text{R}^2$ do modelo com intercepto).
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Ajuste do modelo de regressão linear sem intercepto
 modelo_0 <- lm(peso ~ 0 + volume, data = dados_lobo)
 
@@ -291,7 +291,7 @@ summary(modelo_0)
 
 Ao visualizar o ajuste pela **Figura 3**, o comportamento da reta em relação aos pontos parece razoável, e a suspeita do ponto no canto inferior direto de influenciar a reta não existe mais.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Gráfico de dispersão dos dados originais com a linha de regressão
 ggplot(dados_lobo, aes(x = volume, y = peso)) +
   geom_point() +  # Gráfico de dispersão dos dados
@@ -308,7 +308,7 @@ ggplot(dados_lobo, aes(x = volume, y = peso)) +
 
 Podemos obervar pelo **Output 7** que apenas o teste de Kolmogorov apontou para a normalidade dos resíduos. Além disso, O teste de Durbin-Watson apontou para resíduos não correlacionados, e ao verificar a presença de valores extremos através dos resíduos padronizados pude constatar que não há outliers. Por fim, não foi possível aplicar o teste de Breusch-Pagan para verificar homocedasticidade por ele requerir um modelo com intercepto, o que me levou a aplicar o teste de Goldfeld-Quandt, o qual apontou para resíduos homocedásticos. No geral, o modelo atende aos pressupostos, com a ressalva de que no quesito normalidade, apenas o teste de Kolmogorov o suporta.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Testando a normalidade dos resíduos
 test_press(modelo_0)
 
@@ -327,7 +327,7 @@ summary(rstandard(modelo_0))
 
 No **Output 8** foi computado os intervalos de confiança para os coeficientes estimados. Assim, temos uma estimativa de $\beta_1 = 1.04$ com intervalo de confiança de 95\% sendo $[0.97, 1.10]$.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Construção dos intervalos de confiança para os parâmetros
 intervalos_confianca <- confint(modelo_0)
 print(intervalos_confianca)
@@ -351,7 +351,7 @@ $$\hat{y} = 0 + (1.04)\cdot\text{1000} = 1040$$
 
 **Valor crítico da distribuição t ($t_{\alpha / 2, n-1}$), o erro padrão ($\sqrt{MSE}$), a média amostral $\bar{x}$ e a soma $\sum\left(x_i-\bar{x}\right)^2$**
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Nível de confiança
 nivel_confianca <- 0.95
 
@@ -372,7 +372,7 @@ nivel_confianca <- 0.95
 
 **Calculando o intervalo considerando cada volume sugerido**
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
 # Calculando intervalos de confiança considerando cada volume sugerido
 
 # Volume 600
@@ -427,6 +427,320 @@ print(tab_intervalos0, row.names = FALSE)
 **Output 10**: Tabela com os valores dos pesos esperados para cada volume e seus respectivos intervalos de confiança considerando o modelo sem intercepto.
 
 No geral o modelo sem intecepto está bem ajustado, com algumas ressalvas a serem feitas a respeito da normalidade dos resíduos. O problema é que esse modelo automaticamente assume que se o volume do lobo direito do fígado for zero, então o peso também será zero, o que é uma suposição muito forte a ser feita, e deve se ter muito cuidado. No geral o intercepto é sempre incluído na análise, embora provavelmente possa existir casos específicos nos quais não necessitem, e como não tenho certeza se de fato faz sentido assumir o intercepto zero nesse cenário (consultar com profissionais da área ou pesquisador responsável), o modelo com intercepto acaba sendo mais conveniente.
+
+## Questão 4 (Morettin & Singer)
+
+A planilha chamada "dados_pico," que aparece no **Output 11**, foi criada por mim no Excel, selecionando apenas as variáveis de interesse na questão. Ela contém informações de perfil e medidas obtidas no momento de pico do exercício. 
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+library("readxl") # Pacote para importar dados
+library("knitr") # Tabelas com melhor formatação para LateX
+
+# Lista planilhas do arquivo
+excel_sheets("esforco.xls")
+
+# Carrega os dados
+dados_0 <- read_excel("esforco.xls", sheet = "dados_pico")
+
+# Primeiras 5 linhas da base de dados
+linhas_5 <- head(dados_0, 5)
+kable(linhas_5, format = "latex")
+```
+
+**Output 11**: Importação dos dados de interesse e visualização das primeiras 5 linhas.
+
+O significado de cada variável é apresentado abaixo:
+
+**id**: identificador de cada indivíduo.
+
+**aw**: consumo de oxigênio em ml/(kg.min) no pico do exercício (Desfecho).
+
+**au**: carga na esteira ergométrica.
+
+**k**: classe funcional pelo critério NYHA (1 a 4). É uma classificação usada para predizer o prognóstico e a sobrevida de pacientes com insuficiência cardíaca.
+
+**av**: frequência cardíaca (bpm).
+
+**ax**: razão de troca respiratória.
+
+**h**: peso (kg).
+
+**d**: sexo (F: feminino, M: masculino).
+
+**f**: idade (anos).
+
+## Tratamento dos dados
+
+No **Output 12**, podemos ter uma noção da estrutura da base de dados. No R, é interessante lidar com variáveis categóricas como sendo fatores, podendo acrescentar ou não ordem às classes da variável. Assim, dentre as variáveis da base de dados, as variáveis **k** (cada nível da classificação implica uma progressão na gravidade dos sintomas da insuficiência cardíaca) e **d** (sem ordem aparente) devem ser transformadas em fatores. Além disso, não foram identificados dados faltantes (pelo menos não como dados faltantes do R).
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Estrutura da base de dados
+dplyr::glimpse(dados_0)
+
+# Número de dados faltantes em cada coluna
+colSums(is.na(dados_0))
+```
+
+**Output 12**: Classe de cada coluna no R e quantidade de dados faltantes.
+
+Ao verificar as classes da variável **k**, vemos no **Output 13** que ela está apresentando as classes corretas de 1 a 4, mas também possui uma classe 0. Observe que as 5 primeiras linhas da base, onde apenas as linhas com classe 0 foram selecionadas, possuem exatamente os mesmos valores de identificação da variável **id** apresentados no **Output 11**, mas neste último os valores de **k** não eram zero. Ao investigar a base de dados, foi possível notar que os identificadores são únicos apenas até o 87; as 40 linhas a partir dele possuem os identificadores em ordem de 1 a 40, ou seja, os identificadores dos 40 primeiros indivíduos estão duplicados. Porém, a duplicidade se apresenta apenas nos identificadores, enquanto que as medidas das demais variáveis diferem. Assim, é difícil saber se essas pessoas foram observadas duas vezes, ou se houve algum engano ao preencher a informação de identificação, sendo este último o mais provável, visto que as características físicas e medidas das variáveis diferem, mas fato que não justifica valores zero no critério NYHA. 
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Valores presentes na coluna "k"
+unique(dados_0$k)
+
+# Base de dados onde as linhas são k = 0 (primeiras 5 linhas)
+linhak_5 <- head(dados_0[dados_0$k == 0,], 5)
+kable(linhak_5, format = "latex")
+```
+
+**Output 13**: Identificação das linhas com classificação NYHA igual a zero.
+
+Considerando que o critério NYHA possui apenas 4 níveis (de 1 a 4), decidi trabalhar apenas com os dados dos quais existe certeza da informação apresentada, ou seja, apenas casos em que o critério NYHA (variável **k**) é válido. O tratamento é realizado no **Output 14**.
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Base de dados sem as linhas com classificação k = 0
+dados_1 <- dados_0[dados_0$k != 0,]
+
+# Transforma k em fator ordinal
+ordem_valores <- c(1, 2, 3, 4)
+ordem_categorias <- c("classe1", "classe2", "classe3", "classe4")
+dados_1$k <- factor(dados_1$k, 
+                    levels = ordem_valores, 
+                    labels = ordem_categorias)
+
+# Transforma d em fator sem ordem
+dados_1$d <- factor(dados_1$d, ordered = FALSE)
+```
+
+**Output 14**: Base de dados com apenas as classificações válidas de NYHA e transformando as variáveis **k** e **d** em fatores.
+
+Note no **Output 15** que a variável **au** está sendo interpretada como texto, o que não faz sentido, visto que essa variável se refere à carga na esteira ergométrica. Ao verificar os valores únicos dessa coluna, foi possível identificar um caractere `"."`, o qual está fazendo com que toda a coluna seja do tipo texto. Nesse caso, como são apenas duas linhas com esse problema, decidi imputar a média dos valores, o que é razoável, considerando que a média e mediana são próximas.
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Valores presentes na coluna "au"
+unique(dados_1$au)
+
+aux_au <- dados_1[dados_1$au != ".","au"] # Vetor de dados númericos
+summary(as.numeric(aux_au$au)) # Sumário
+mean_au <- mean(as.numeric(aux_au$au)) # Média
+
+dados_1[dados_1$au == ".","au"] <- as.character(mean_au) # Troca "." pela média
+dados_1$au <- as.numeric(dados_1$au) # Classe correta da variável
+```
+
+**Output 15**: Tratamento da variável **au**.
+
+Por fim, pode-se visualizar a estrutura final da base de dados no **Output 16**, onde todas as variáveis estão com suas classes corretas.
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Estrutura da base de dados
+dplyr::glimpse(dados_1)
+```
+
+**Output 16**: Estrutura da base de dados após o tratamento.
+
+## 4.a
+
+Considerando o desfecho de consumo de oxigênio em ml/(kg.min) no pico do exercício (variável **aw**), podemos observar na **Figura 4** que apenas a carga na esteira ergométrica (variável **au**) e a frequência cardíaca (variável **av**) possuem uma correlação moderada a forte com o desfecho, apresentando uma correlação de Pearson de 0.758 e 0.490, respectivamente.
+
+Desconsiderando o desfecho, observa-se que a variável **au** possui uma correlação não desprezível com as variáveis **av** e **h**, sendo de 0.360 e 0.424 respectivamente. As demais correlações são todas fracas ou ligeiramente baixas para serem consideradas relevantes.
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+library("GGally") # Extenção para o ggplot2
+
+# Crie a matriz de gráficos de dispersão
+scatter_matrix <- ggpairs(
+    dados_1[, c("aw", "au", "av", "ax", "h", "f")],
+    lower = list(continuous = "points", combo = "box")
+)
+
+# Imprima a matriz de gráficos de dispersão ajustada
+print(scatter_matrix)
+```
+
+**Figura 4**: Matriz de gráficos de dispersão das variáveis numéricas. Na diagonal, estão as curvas de densidade das distribuições de cada variável numérica. Na parte inferior da matriz estão os gráficos de dispersão 2 x 2, e na parte superior, a correlação de Pearson.
+
+Agora, considerando os dados agrupados pelos níveis do critério de NYHA, a **Figura 5** apresenta a matriz dos gráficos de dispersão com informações agrupadas. Considerando que **au** e **av** foram as variáveis com maior correlação de Pearson com o desfecho (relação linear), podemos observar que, ao analisar os níveis do critério de NYHA, as classes de 1 a 3 apresentam uma correlação mais relevante com **au**, e uma correlação baixa, porém não desprezível, na classe 4. Enquanto isso, para **av**, ocorre uma maior correlação nas classes 1 e 3, e uma relação não desprezível na classe 2.
+
+Entre as variáveis, sem considerar o desfecho, o destaque está nas correlações com a variável **au**, sendo a classe 1 do **av** (correlação de 0.683), a classe 2 do **ax** (correlação de 0.566), as classes 2 e 4 do **h** (correlação de 0.508 e 0.637, respectivamente) e as classes 1 e 2 do **f** (correlação de -0.535 e -0.459, respectivamente). Além disso, uma correlação possivelmente relevante pode ser observada entre **av** e **f** ao analisar a classe 1, apresentando uma correlação de -0.563.
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Crie uma cópia dos dados sem a coluna "k"
+dados_sem_k <- dados_1[, c("aw", "au", "av", "ax", "h", "f")]
+
+# Crie a matriz de gráficos de dispersão
+scatter_matrix <- ggpairs(
+    dados_sem_k,
+    ggplot2::aes(colour = dados_1$k),
+    lower = list(continuous = "points", combo = "box")
+)
+
+# Imprima a matriz de gráficos de dispersão ajustada
+print(scatter_matrix)
+```
+
+**Figura 5**: Matriz de gráficos de dispersão das variáveis numéricas, agora considerando os níveis do critério NYHA (variável **k**). Na diagonal, estão as curvas de densidade das distribuições de cada variável numérica agrupada. Na parte inferior da matriz estão os gráficos de dispersão 2 x 2 agrupados, e na parte superior, a correlação de Pearson.
+
+Por fim, a **Figura 6** considera os dados agrupados pela variável **sexo**. A primeira coisa que é possível notar graças às cores nos gráficos de dispersão é que há consideravelmente mais indivíduos do sexo masculino do que do feminino na amostra. Outro ponto é que a distribuição do consumo de oxigênio (**aw**) e carga na esteira ergométrica (**au**) é bem diferente entre os grupos, o que não parece ocorrer nas demais variáveis.
+
+Olhando para a correlação das variáveis **au** e **av** com o desfecho, o sexo masculino apresenta a maior correlação, sendo 0.751 e 0.515, respectivamente (observação: 0.414 para o sexo feminino no **av** não é desprezível).
+
+Desconsiderando o desfecho, o destaque se encontra na classe masculina para uma correlação não desprezível entre **au** e **av**, sendo de 0.391. Além disso, em ambas as classes na correlação entre **au** e **h**, sendo de 0.814 (masculino) e 0.400 (feminino).
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Crie uma cópia dos dados sem a coluna "d"
+dados_sem_d <- dados_1[, c("aw", "au", "av", "ax", "h", "f")]
+
+# Crie a matriz de gráficos de dispersão
+scatter_matrix <- ggpairs(
+    dados_sem_d,
+    ggplot2::aes(colour = dados_1$d),
+    lower = list(continuous = "points", combo = "box")
+)
+
+# Imprima a matriz de gráficos de dispersão ajustada
+print(scatter_matrix)
+```
+
+**Figura 6**: Matriz de gráficos de dispersão das variáveis numéricas, agora considerando a variável **sexo**. Na diagonal, estão as curvas de densidade das distribuições de cada variável numérica agrupada. Na parte inferior da matriz estão os gráficos de dispersão 2 x 2 agrupados, e na parte superior, a correlação de Pearson.
+
+## 4.b
+
+Com o objetivo de ajustar um modelo linear tendo o consumo de oxigênio no pico do exercício (**aw**) dos pacientes com insuficiência cardíaca como desfecho, podemos usar um modelo de regressão linear múltiplo. A suposta relação linear entre as variáveis independentes e **aw** (variável resposta) pode ter a seguinte representação:
+
+$$
+\text{aw}=\beta_0+\beta_1 \text{au}+ \beta_2 \text{av} +\beta_3 \text{ax} + \beta_4 \text{h} + \beta_5 \text{f} + \beta_6 \text{dM} + \beta_7 \text{k2} + \beta_8 \text{k3} + \beta_9 \text{k4} + \epsilon
+$$
+
+Onde **aw** é o desfecho, e **au**, **av**, **ax**, **h**, **f**, **d**, e **k** são as variáveis independentes. Os termos $\beta$ representam os parâmetros e $\epsilon$ é o erro aleatório. A interpretação dos parâmetros nessa representação se dá da seguinte forma:
+
+$\beta_0$ é o consumo esperado de oxigênio no pico do exercício quando todas as variáveis independentes são zero (caso mais extremo). $\beta_1$ é o "efeito" ou mudança esperada no consumo de oxigênio no pico do exercício para um incremento de uma unidade na carga na esteira ergométrica. Similarmente, $\beta_2$ é a mudança esperada no consumo de oxigênio no pico do exercício para um incremento de uma unidade na frequência cardíaca, e assim por diante para as demais covariáveis numéricas.
+
+No caso da covariável **d**, que se refere ao sexo, uma das duas categorias é considerada como referência. Nessa estrutura, a categoria feminina é a referência. Portanto, $\beta_6$ representa a mudança esperada no consumo de oxigênio no pico do exercício vindo da categoria masculina em comparação com a categoria feminina, mantendo as outras covariáveis constantes. A mesma ideia se aplica à variável **k**, onde uma categoria (no caso, a classe 1) é usada como referência. Dessa forma, $\beta_7$ é a mudança esperada no consumo de oxigênio vindo da classe 2 em comparação com a classe 1, e assim sucessivamente para $\beta_8$ e $\beta_9$, considerando as classes 3 e 4, respectivamente.
+
+## 4.c
+
+No **Output 17** é apresentado o modelo de regressão linear múltiplo considerando todas as covariáveis. A informação do erro padrão e da significância dos parâmetros também é apresentada, onde as variáveis menos significativas (considerando nível de 5\% de significância) são a razão de troca respiratória (**ax**), idade (**f**) e sexo (**d**).
+ 
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Ajuste um modelo de regressão linear múltipla
+modelo_0 <- lm(aw ~ au + av + ax + h + f + d + k, data = dados_1)
+
+# Resumo do modelo
+summary(modelo_0)
+```
+
+**Output 17**: Modelo de regressão linear múltiplo considerando todas as covariáveis da base de dados.
+
+## 4.d
+
+O **Output 18** apresenta quatro gráficos de diagnóstico básicos para a regressão linear. Os gráficos **Residuals vs Fitted** e **Scale-Location** não apresentam nenhum padrão aparente nos pontos, o que indica linearidade nos parâmetros estimados e homocedasticidade dos resíduos.
+
+Além disso, o **Q-Q Residuals** segue bem a reta para a maioria dos pontos. No entanto, na cauda superior, os pontos se afastam consideravelmente, especialmente as observações 34 e 18. Na cauda inferior, a maior preocupação está na observação 22.
+
+Por fim, **Residuals vs Leverage** aponta a observação 22 a uma distância relativamente alta de Cook (superior a 0.5), embora não seja extrema (é inferior a 1).
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Layout
+layout(matrix(c(1, 2, 3, 4), 2, 2))
+
+# Gráficos de diagnóstico
+plot(modelo_0)
+```
+
+**Output 18**: Gráficos de diagnósticos: **Residuals vs Fitted** para verificar linearidade; **Scale-Location** para verificar homocedasticidade; **Q-Q Residuals** para verificar normalidade e **Residuals vs Leverage** para verificar pontos influentes.
+
+## 4.e
+
+Como vimos anteriormente no **Output 17**, considerando o nível de 5\% de significância, apenas as variáveis **ax** (valor-p de 0.063), **f** (valor-p de  0.23) e **d** (valor-p de 0.057) não foram significativas. Portanto, serão removidas do modelo. 
+
+## 4.f
+
+**Ajuste**
+
+Podemos notar **Output 19** que todas as variáveis são significativas com exceção da classe 2 da variável **k**.
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Ajuste um modelo de regressão linear múltipla
+modelo_1 <- lm(aw ~ au + av + h + k, data = dados_1)
+
+# Resumo do modelo
+summary(modelo_1)
+```
+
+**Output 19**: Modelo de regressão linear múltiplo após a remoção das variáveis não significativas.
+
+**Diagnósticos**
+
+Note no **Output 20** que as suposições de linearidade dos parâmetros, homocedasticidade dos resíduos e não correlação dos resíduos parecem estar sendo atendidas. Por outro lado, a suposição de normalidade claramente ainda está sendo violada.
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Layout
+layout(matrix(c(1, 2, 3, 4), 2, 2))
+
+# Gráficos de diagnóstico
+plot(modelo_1)
+```
+
+**Output 20**: Gráficos de diagnósticos do modelo após a remoção das variáveis não significativas: **Residuals vs Fitted** para verificar linearidade; **Scale-Location** para verificar homocedasticidade; **Q-Q Residuals** para verificar normalidade e **Residuals vs Leverage** para verificar pontos influentes.
+
+No **Output 21**, é confirmado que, em geral, o modelo atende aos pressupostos. No entanto, apenas o teste de Kolmogorov-Smirnov aponta normalidade dos resíduos, o que é preocupante. Além disso, note que a observação 22 é de fato um outlier, mas a distância de cook deixa a dúvida sobre a influência desse ponto, pois anteriormente ultrapassava a distância de 0.5 e após a remoção das variáveis não significativas ele ficou abaixo desse valor, porém próximo. É possível que esta observação esteja atrapalhando modelo. 
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+# Testando a normalidade dos resíduos
+test_press(modelo_1)
+
+# Teste de Breusch-Pagan (Homocedasticidade)
+lmtest::bptest(modelo_1)
+
+# Teste de Durbin-Watson (correlação dos resíduos)
+durbinWatsonTest(modelo_1)
+
+# Verificando outliers
+car::outlierTest(modelo_1)
+
+# Observações influentes
+cutoff <- 4/((nrow(dados_1)-length(modelo_1$coefficients)-2)) 
+plot(modelo_1, which=4, cook.levels=cutoff)
+```
+
+**Output 21**: Testes estatísticos de disgnósticos do modelo.
+
+Em cenários em que há a presença de outliers e pontos influentes em uma regressão linear, não podemos simplesmente remover esse dado pois pode impactar na característica geral dos dados. Uma forma de lidar com isso é aplicando métodos de regressão robusta. 
+
+Para não precisar realizar toda uma nova análise utilizando métodos de regressão robusta, no **Output 22** optei em construir os intervalos de confiança das estimativas utilizando um método de bootstrap chamado de *bias-corrected and accelerated (BCa)*, o qual faz correções de viés e assimetria na distribuição das estimativas bootstrap (ideal em cenários de não normalidade).
+
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=9}
+#sample(1000, 1) = 953
+set.seed(953)
+
+modelo_1_boot <- car::Boot(modelo_1, R=1000)
+summary(modelo_1_boot)
+
+# Colunas com os intervalos de confiança de 95%
+intervalos_modelo_1 <- confint(modelo_1_boot)
+
+# Coluna de coeficientes estimados
+coefficients_modelo_1 <- as.data.frame(coef(modelo_1))
+
+aux_tabel <- data.frame("Coeficientes" = coefficients_modelo_1,
+                        intervalos_modelo_1)
+names(aux_tabel) <- c("Coeficientes", "2.5 %", "97.5 %")
+kable(aux_tabel, format = "latex")
+```
+
+**Output 22**: Estimativas dos coeficientes e intervalos de confiança de 95\% obtidos por bootstrap.
+
+## 4.g
+
+Considerando o modelo ajustado, no cenário extremo em que todas as covariáveis são nulas, o consumo esperado de oxigênio dos pacientes com insuficiência cardíaca no pico do exercício é de 11.13 (unidade: ml/(kg.min); $\text{IC}(95\%) = [3.12, 16.59]$).
+
+Além disso, ainda considerando o efeito esperado no consumo de oxigênio: a cada unidade de incremento na carga na esteira ergométrica, é esperado um aumento de 0.12 (unidade: ml/(kg.min); $\text{IC}(95\%) = [0.09, 0.14]$). Com cada unidade de incremento na frequência cardíaca (bpm), é esperado um aumento de 0.04 (unidade: ml/(kg.min); $\text{IC}(95\%) = [0.02, 0.09]$). A cada unidade de incremento no peso (kg), é esperado um decréscimo de 0.15 (unidade: ml/(kg.min); $\text{IC}(95\%) = [0.09, 0.21]$).
+
+Por fim, em comparação com a classe 1 do critério NYHA, é esperado um decréscimo vindo da classe 3 de 2.33 (unidade: ml/(kg.min); $\text{IC}(95\%) = [0.88, 4.37]$) no consumo de oxigênio. Em relação à classe 4 do critério NYHA, é esperado um decréscimo de 2.30 (unidade: ml/(kg.min); $\text{IC}(95\%) = [0.53, 3.98]$). Comparado com a classe 2 do critério NYHA, é esperado um decréscimo de 1.29. No entanto, neste caso, a classe 2 não foi significativa no modelo ajustado.
+
+## Questão 5 (Morettin & Singer)
 
 ## Questão 6 (Morettin & Singer)
 
@@ -541,6 +855,8 @@ A Ornella em seu trabalho de iniciação científica discute esses métodos de i
   7 - **Valores shapley**: É um método baseado na teoria dos jogos, que visa distribuir de forma justa as previsões às covariáveis de um subconjunto de variáveis de acordo com a contribuição (positiva ou negativa) individual de cada uma no modelo preditivo em relação à previsão média feita para todos os dados. É um dos métodos mais completos com intuito de explicabilidade, porém com um custo computacional maior.
   
 Note que todos possuem cenários nos quais eles podem ser utilizados, então é importante verificar para o cenário em questão qual seria o método mais apropriado.
+
+## Questão 13 (Extra)
   
 
 
