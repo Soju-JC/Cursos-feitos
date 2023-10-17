@@ -742,6 +742,48 @@ Por fim, em comparação com a classe 1 do critério NYHA, é esperado um decré
 
 ## Questão 5 (Morettin & Singer)
 
+Modelo a ser considerado:
+
+$$\log \left\{\frac{\pi_i\left(x_i, w_i\right)}{1-\pi_i\left(x_i, w_i\right)}\right\}=\alpha+\beta x_i+\gamma\left(w_i-5\right), i = 1, \dots,50$$
+
+## 5.a
+
+O parâmetro $\alpha$ é o logaritmo da chance quando todas as covariáveis são nulas (caso mais extremo). Assim, quando o gênero for feminino ($x = 0$) e a idade for 5 ($w = 5$), então, o log da chance de preferência pelo refrigerante Kcola será 0.69. Além disso, ao aplicar a função exponencial no coeficiente estimado, teremos a interpretação em termos da razão de chances, logo, a chance de preferir Kcola é 99\% ($\exp(0.69) = 1.99$) maior do que não preferir.
+
+Considerando o parâmetro $\beta = 0.33$ e ficado a idade, a chance de preferir Kcola sendo do gênero masculino é 39\% ($\exp(0.33) = 1.39$) maior do que sendo do gênero feminino. Por fim, considernado o parâmetro $\gamma = -0.03$, cada incremento de 1 ano na idade está associado com uma redução de 3\% ($1- \exp(-0.03) = 1 - 0.97 = 0.03$) na chance de preferência por Kcola.
+
+## 5.b
+
+$$OR = \frac{\exp[\alpha+\beta x+\gamma\left(w-5\right)]}{\exp[\alpha+\beta x+\gamma\left(w-5\right)]} = \frac{\exp[0.69+0.33 x-0.03\left(10-5\right)]}{\exp[0.69+0.33 x-0.03\left(15-5\right)]} =$$
+
+$$= \frac{\exp[-0.03\left(10-5\right)]}{\exp[0.03\left(15-5\right)]} = \frac{\exp(-0.15)}{\exp(0.3)} = \exp(0.15) = 1.1618$$
+
+Considerando crianças do mesmo gênero, aquelas que possuem 10 anos de idade possuem 16.18\% mais chances de ter preferência por Kcola do que as crianças com 15 anos.
+
+## 5.c
+
+Para construir o intervalo de confiança para $\exp(\beta)$ pordemos fazer uso da propriedade de invariância, onde, considerando o intervalo para o parâmetro sendo $\beta \pm z^* SE\left(\beta\right)$, teremos que o intervalo de $\exp(\beta)$ será $\exp(\beta \pm z^* SE\left(\beta\right))$. Dessa forma, o intervalo de 95\% para $\exp(\beta)$ será $\exp(0.33 \pm 1.96*0.10) = [1.14,1.69]$ e para $\exp(\gamma)$ será $\exp(-0.03 \pm 1.96*0.005) = [0.96,0.98]$.
+
+A interpretação pode ser dada da seguinte forma:
+
+**Para** $\beta$: É esperado um aumento entre 14\% a 69\% na chance de preferência por Kcola em crianças do gênero masculino comparado com as do gênero feminino.
+
+**Para** $\gamma$: Para cada incremento de 1 ano na idade, é esperado uma redução de 2\% a 4\% na chance de preferência por Kcola.
+
+## 5.d
+
+$$\log{(ODDS)} = \alpha+\beta x_i + \gamma(w_i - 5), i=1, \ldots, 50$$
+
+Considerando crianças do gênero masculino com 15 anos:
+
+$$= 0.69+0.33 -0.03(15 - 5) = 0.72$$
+
+Obtendo o termo em probabilidade:
+
+$$\pi_i = \frac{\exp[\log{(ODDS)}]}{1+\exp[\log{(ODDS)}]} = \frac{\exp[0.72]}{1+\exp[0.72]} = 0.6726$$
+
+Assim, a probabilidade de crianças do gênero masculino com 15 anos de idade preferirem Kcola é de 0.6726.
+
 ## Questão 6 (Morettin & Singer)
 
 Expressão (6.29 do livro):
@@ -774,15 +816,29 @@ Note que a expressão de $P\left(Y_i=1 \mid X=x\right)$ possui o denominador igu
 
 ## Questão 7 (Morettin & Singer)
 
-A razão de chances (odds ratio) é definida da seguinte forma:
+A chance (odds) é definida da seguinte forma:
 
-$$OR = \frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}, i=1, \ldots, n$$
+$$ODDS = \frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)} = \exp(\alpha + \beta x_i), i=1, \ldots, n$$
 
 Logo, ao aplicar a função logarítmica em ambos os lado obtemos:
 
-$$\log{(OR)} = \log{\left(\frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}\right)} = \alpha+\beta x_i, i=1, \ldots, n$$
+$$\Leftrightarrow \log{(ODDS)} = \log{\left(\frac{P\left(Y_i=1 \mid X=x\right)}{P\left(Y_i=0 \mid X=x\right)}\right)} = \alpha+\beta x_i, i=1, \ldots, n$$
 
-Asim, para cada aumento de uma unidade em $x_i$, o log da razão de chances muda com um impacto de $\beta$ vezes.
+Esse é o modelo a ser considerado. Agora, incluindo o cenário com incremento de uma unidade na variável explicativa podemos construir a OR da seguinte forma:
+
+$$OR = \frac{ODDS^*}{ODDS} = \frac{\exp[\alpha + \beta(x_i + 1)]}{\exp(\alpha + \beta x_i)}, i=1, \ldots, n$$
+
+Aplicando o logaritmo em ambos os lados:
+
+$$\Leftrightarrow \log(OR) = \log\left[\frac{\exp[\alpha + \beta(x_i + 1)]}{\exp(\alpha + \beta x_i)}\right], i=1, \ldots, n$$
+
+$$ = \log[\exp(\alpha + \beta(x_i + 1))] - \log\left[\exp(\alpha + \beta x_i)\right], i=1, \ldots, n$$
+
+$$ = \alpha + \beta(x_i + 1) - \alpha - \beta x_i, i=1, \ldots, n$$
+
+$$ = \beta x_i + \beta - \beta x_i, i=1, \ldots, n$$
+
+$$ = \beta$$
 
 ## Questão 8 (Extra)
 
